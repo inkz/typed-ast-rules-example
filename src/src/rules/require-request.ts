@@ -75,8 +75,6 @@ export const rule: Rule = {
                 node,
                 checkId: "require-from-request"
               });
-            } else {
-              reqVariables.push(name);
             }
           }
         }
