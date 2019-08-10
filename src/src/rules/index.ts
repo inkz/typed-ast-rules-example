@@ -1,6 +1,7 @@
 import * as estree from "estree";
 import * as walker from "estree-walker";
 import * as nonLiteralRequire from "./non-literal-require";
+import * as requireRequest from "./require-request";
 import * as stadt from "stadt";
 
 // The API design here is intentionally patterned after a simplified version of
@@ -63,7 +64,10 @@ export function possibleTypes(ty: stadt.Type): stadt.Type[] {
   }
 }
 
-export const all: ReadonlyArray<Rule> = [nonLiteralRequire.rule];
+export const all: ReadonlyArray<Rule> = [
+  nonLiteralRequire.rule,
+  requireRequest.rule
+];
 
 // Constructs a context for the given AST, runs the given rules over it, and
 // returns the context.
