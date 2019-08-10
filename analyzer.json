@@ -1,7 +1,7 @@
 {
-  "analyzer_name": "r2c/typed-ast-rules-example",
-  "author_name": "Jav. A. Script",
-  "author_email": "hello@example.com",
+  "analyzer_name": "inkz/typed-ast-rules-example",
+  "author_name": "inkz",
+  "author_email": "inkz@xakep.ru",
   "version": "1.0.0",
   "spec_version": "1.2.0",
   "dependencies": {
