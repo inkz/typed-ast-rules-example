@@ -27,6 +27,29 @@ function isRequest(object: any): boolean {
   return false;
 }
 
+function getIdentifiers(arg: any): estree.Identifier[] {
+  const types = [];
+  if (Array.isArray(arg)) {
+    arg.forEach(a => types.push(...getIdentifiers(a)));
+  } else if (arg.type === 'Identifier') {
+    types.push(arg);
+  } else {
+    if ((arg as any).left) {
+      types.push(...getIdentifiers(arg.left));
+    }
+    if ((arg as any).right) {
+      types.push(...getIdentifiers(arg.right));
+    }
+    if ((arg as any).arguments) {
+      types.push(...getIdentifiers(arg.arguments));
+    }
+    if ((arg as any).expressions) {
+      types.push(...getIdentifiers(arg.expressions));
+    }
+  }
+  return types;
+}
+
 export const rule: Rule = {
   create(context: Context) {
     const reqVariables: String[] = [];
@@ -36,14 +59,7 @@ export const rule: Rule = {
           const id: estree.Pattern = node.id;
           if (id.type === 'Identifier') {
             const name = (id as estree.Identifier).name;
-            if (reqVariables.includes(name)) {
-              context.report({
-                node,
-                checkId: "require-from-request"
-              });
-            } else {
-              reqVariables.push(name);
-            }
+            reqVariables.push(name);
           }
         }
       },
@@ -68,14 +84,17 @@ export const rule: Rule = {
               node,
               checkId: "require-from-request"
             });
-          } else if (args[0].type === 'Identifier') {
-            const name = (args[0] as estree.Identifier).name;
-            if (reqVariables.includes(name)) {
-              context.report({
-                node,
-                checkId: "require-from-request"
-              });
-            }
+          } else {
+            const identifiers = getIdentifiers(args[0]);
+            identifiers.forEach((id: estree.Identifier) => {
+              const name = id.name;
+              if (reqVariables.includes(name)) {
+                context.report({
+                  node,
+                  checkId: "require-request-var"
+                });
+              }
+            });
           }
         }
       }
