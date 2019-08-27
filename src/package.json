@@ -25,6 +25,6 @@
     "estree-walker": "^0.6.0",
     "glob": "^7.1.3",
     "immutable": "^4.0.0-rc.12",
-    "stadt": "https://github.com/inkz/st-tmp"
+    "stadt": "^0.3.0"
   }
 }
