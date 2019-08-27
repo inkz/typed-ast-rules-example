@@ -5,7 +5,7 @@
   "version": "1.0.5",
   "spec_version": "1.2.0",
   "dependencies": {
-    "r2c/typed-ast": "1.1.0"
+    "r2c/typed-ast": "2.0.0"
   },
   "type": "commit",
   "output": {
