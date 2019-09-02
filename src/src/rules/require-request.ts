@@ -14,17 +14,27 @@ function isRequire(ty: stadt.Type): boolean {
 }
 
 function isRequest(object: any): boolean {
+  let result = false;
   if (object && object.type === 'MemberExpression' && object.object) {
-    const ty: stadt.Type = stadt.fromJSON(object.object.inferredType);
+    let ty: stadt.Type = stadt.fromJSON(object.object.inferredType);
     if (ty) {
-      if (!(ty instanceof stadt.NominativeType)) {
-        return false;
+      if (ty instanceof stadt.IntersectionType) {
+        if (Array.isArray(ty.types)) {
+          ty = ty.types.filter(t => t instanceof stadt.NominativeType)[0];
+        }
+      } 
+      if (!ty || !(ty instanceof stadt.NominativeType)) {
+        return result;
       }
       const { name, packageName } = ty.fullyQualifiedName;
-      return (packageName === "@types/express-serve-static-core" && name === "Request");
+      if (packageName === '@types/express-serve-static-core' && name === 'Request') {
+        result = true;
+      } else if (packageName === '@types/koa') {
+        result = ['Request', 'ExtendableContext'].includes(name);
+      }
     }
   }
-  return false;
+  return result;
 }
 
 function getIdentifiers(arg: any): estree.Identifier[] {
