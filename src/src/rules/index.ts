@@ -1,6 +1,5 @@
 import * as estree from "estree";
 import * as walker from "estree-walker";
-import * as nonLiteralRequire from "./non-literal-require";
 import * as requireRequest from "./require-request";
 import * as stadt from "stadt";
 
@@ -65,7 +64,6 @@ export function possibleTypes(ty: stadt.Type): stadt.Type[] {
 }
 
 export const all: ReadonlyArray<Rule> = [
-  nonLiteralRequire.rule,
   requireRequest.rule
 ];
 
