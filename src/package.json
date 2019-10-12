@@ -1,6 +1,6 @@
 {
   "name": "r2c-typed-ast-rules",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "Static analysis rules that consume the output of r2c/typed-ast.",
   "main": "dist/src/index.js",
   "scripts": {
