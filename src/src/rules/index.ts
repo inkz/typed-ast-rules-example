@@ -1,7 +1,8 @@
 import * as estree from "estree";
 import * as walker from "estree-walker";
 // import * as requireRequest from "./require-request";
-import * as jwtPayloadKeys from "./jwt-payload-keys";
+// import * as jwtPayloadKeys from "./jwt-payload-keys";
+import * as jwtHardcode from "./jwt-hardcode";
 import * as stadt from "stadt";
 
 // The API design here is intentionally patterned after a simplified version of
@@ -66,7 +67,8 @@ export function possibleTypes(ty: stadt.Type): stadt.Type[] {
 
 export const all: ReadonlyArray<Rule> = [
   // requireRequest.rule,
-  jwtPayloadKeys.rule
+  // jwtPayloadKeys.rule
+  jwtHardcode.rule
 ];
 
 // Constructs a context for the given AST, runs the given rules over it, and
