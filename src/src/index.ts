@@ -57,7 +57,19 @@ async function main() {
     absolute: true
   });
   const results = [];
-  for (const astPath of astPaths) {
+  const filteredAstPaths = astPaths.filter((astPath) => {
+    const parts = astPath.split(path.sep);
+    if (
+      parts.includes('test')
+      || parts.includes('tests')
+      || astPath.endsWith('.spec.js.ast.json')
+      || astPath.endsWith('.test.js.ast.json')
+    ) {
+      return false;
+    }
+    return true;
+  });
+  for (const astPath of filteredAstPaths) {
     const ast = JSON.parse(await fs.promises.readFile(astPath, "utf8"));
     for (const report of rules.runRules(ast, rules.all).getReports()) {
       let originalPath = path.relative(inputDir, astPath);
