@@ -9,7 +9,46 @@ function isJwtLibrary(ty: stadt.Type): boolean {
   const { name, packageName } = ty.fullyQualifiedName;
   //check if it is `jsonwebtoken` or `jose ` module
   return (packageName === '@types/jsonwebtoken' && (name.indexOf('jsonwebtoken') > -1))
-    || (packageName === 'jose' && ['JWT', 'JWK'].includes(name));
+    || (packageName === 'jose' && ['JWT'].includes(name));
+}
+
+function isJwkAsKey(ty: stadt.Type) {
+  if (!(ty instanceof stadt.NominativeType)) {
+    return false;
+  }
+  const { name, packageName } = ty.fullyQualifiedName;
+  return (packageName === 'jose' && ['JWK'].includes(name));
+}
+
+function isHardcodedJwkKey(arg: estree.Node, ty: stadt.Type): boolean {
+  if (arg.type === 'CallExpression' && arg.callee.type === 'MemberExpression') {
+    const objType = getType(arg.callee.object);
+    if (objType && objType.mustSatisfy(isJwkAsKey) && arg.callee.property.type === 'Identifier' && arg.callee.property.name === 'asKey') {
+      const keyType = arg.arguments[0] && getType(arg.arguments[0]);
+      if (keyType) {
+        return keyType.mustSatisfy(t => t.isLiteral());
+      }
+    }
+  }
+  return false;
+}
+
+function isHardocdedSecret(arg: estree.Node, ty: stadt.Type): boolean {
+  return ty.mustSatisfy(t => t.isLiteral() || isHardcodedJwkKey(arg, ty));
+}
+
+function filterJwtTypes (type: any) {
+  if (type instanceof stadt.NominativeType) {
+    const {name, packageName} = type.fullyQualifiedName
+    if (packageName === '@types/jsonwebtoken') {
+      return true;
+    }
+  }
+}
+
+function isJwtCaller (ty: stadt.ObjectType) {
+  return ty.callSignatures.filter(o => o.parameters.map(p => p && p.type).filter(filterJwtTypes).length).length
+    && ty.callSignatures.filter(o => o.parameters.map(p => p && p.name).filter(name => name === 'secretOrPrivateKey').length).length
 }
 
 function findHardcodedSecret(node: estree.CallExpression) {
@@ -18,16 +57,21 @@ function findHardcodedSecret(node: estree.CallExpression) {
     const ty: stadt.Type | undefined = getType(obj.object);
 
     if (ty && possibleTypes(ty).some(isJwtLibrary)) {
-      let secret;
-      if (obj.property && (obj.property as estree.Identifier).name === 'sign') {
-        secret = node.arguments[1];
+      if (obj.property && ['sign', 'verify'].includes((obj.property as estree.Identifier).name)) {
+        const secret = node.arguments[1];
+        const secretType = secret && getType(secret);
+        if (secretType && isHardocdedSecret(secret, secretType)) {
+          return secret;
+        }
       }
-      if (obj.property && (obj.property as estree.Identifier).name === 'asKey') {
-        secret = node.arguments[0];
-      }
-      if (secret) {
-        const secretType = getType(secret);
-        if (secretType && secretType.mustSatisfy(t => t.isLiteral())) {
+    }
+  } else {
+    const calleeType = getType(node.callee);
+    if(calleeType && calleeType.isObject()) {
+      if (Array.isArray(calleeType.callSignatures) && isJwtCaller(calleeType)) {
+        const secret = node.arguments[1];
+        const secretType = secret && getType(secret);
+        if (secretType && isHardocdedSecret(secret, secretType)) {
           return secret;
         }
       }
