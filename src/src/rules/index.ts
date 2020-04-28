@@ -1,6 +1,6 @@
 import * as estree from "estree";
 import * as walker from "estree-walker";
-import * as ormExpose from "./orm-expose";
+import * as jwtExpo from "./jwt-expo";
 import * as stadt from "stadt";
 
 // The API design here is intentionally patterned after a simplified version of
@@ -64,7 +64,7 @@ export function possibleTypes(ty: stadt.Type): stadt.Type[] {
 }
 
 export const all: ReadonlyArray<Rule> = [
-  ormExpose.rule
+  jwtExpo.rule
 ];
 
 // Constructs a context for the given AST, runs the given rules over it, and
